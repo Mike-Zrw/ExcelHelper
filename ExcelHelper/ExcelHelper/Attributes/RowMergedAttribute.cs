@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace ExcelHelper.Attributes
 {
     /// <summary>
-    /// 唯一验证
+    /// 行合并，根据ParentKey合并
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-    public class ColumnUniqueAttribute : Attribute
+    public class RowMergedAttribute : Attribute
     {
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ExcelHelper.Excel.Attributes
+namespace ExcelHelper.Attributes
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     public class StringFormatterAttribute : Attribute

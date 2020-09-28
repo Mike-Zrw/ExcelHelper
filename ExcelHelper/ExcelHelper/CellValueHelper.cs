@@ -2,7 +2,7 @@
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace ExcelHelper.Excel
+namespace ExcelHelper
 {
     /// <summary>
     /// 单元格帮助

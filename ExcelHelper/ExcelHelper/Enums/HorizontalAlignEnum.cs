@@ -1,4 +1,4 @@
-﻿namespace ExcelHelper.Excel.Enums
+﻿namespace ExcelHelper
 {
     public enum HorizontalAlignEnum
     {

@@ -1,4 +1,4 @@
-﻿namespace ExcelHelper.Excel
+﻿namespace ExcelHelper
 {
     public class DefaultStyle
     {

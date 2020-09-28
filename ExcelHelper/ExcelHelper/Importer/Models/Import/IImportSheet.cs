@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExcelHelper.Excel.Importer.Models.Import
+namespace ExcelHelper.Importer.Models.Import
 {
     public interface IImportSheet
     {

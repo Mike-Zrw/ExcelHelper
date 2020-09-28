@@ -4,7 +4,7 @@ using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace ExcelHelper.Excel
+namespace ExcelHelper
 {
     public class WorkbookGenerator
     {

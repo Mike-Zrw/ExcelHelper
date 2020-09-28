@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ExcelHelper.Excel.Importer.Models.Import;
+using ExcelHelper.Importer.Models.Import;
 
-namespace ExcelHelper.Excel.Importer.Models.Result
+namespace ExcelHelper.Importer.Models.Result
 {
     public class ResultSheet<T> : ImportSheet<T>, IResultSheet
              where T : ImportModel

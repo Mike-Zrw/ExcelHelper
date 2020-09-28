@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ExcelHelper.Excel.Exporter
+namespace ExcelHelper.Exporter
 {
     public class ExportSheet
     {

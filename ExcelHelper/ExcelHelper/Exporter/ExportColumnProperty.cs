@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using ExcelHelper.Excel.Attributes;
+using ExcelHelper.Attributes;
 
-namespace ExcelHelper.Excel.Exporter
+namespace ExcelHelper.Exporter
 {
     public class ExportColumnProperty
     {
@@ -16,23 +16,22 @@ namespace ExcelHelper.Excel.Exporter
 
             if (property.GetCustomAttribute(typeof(HeaderStyleAttribute)) is HeaderStyleAttribute headerAttr)
             {
-                this.HeaderIsBold = headerAttr.IsBold;
-                this.HeaderFontColor = headerAttr.FontColor;
-                this.HeaderFontSize = headerAttr.FontSize;
-                this.HeaderFontName = headerAttr.FontName;
+                this.HeaderStyle = headerAttr;
             }
 
             if (property.GetCustomAttribute(typeof(ColumnStyleAttribute)) is ColumnStyleAttribute columnAttr)
             {
-                this.IsBold = columnAttr.IsBold;
-                this.FontColor = columnAttr.FontColor;
-                this.FontSize = columnAttr.FontSize;
-                this.FontName = columnAttr.FontName;
+                this.ColumnStyle = columnAttr;
             }
 
             if (property.GetCustomAttribute(typeof(StringFormatterAttribute)) is StringFormatterAttribute formatAttr)
             {
                 this.StringFormat = formatAttr.Format;
+            }
+
+            if (property.GetCustomAttribute(typeof(RowMergedAttribute)) is RowMergedAttribute)
+            {
+                this.RowMerged = true;
             }
 
             this.PropertyInfo = property;
@@ -46,23 +45,13 @@ namespace ExcelHelper.Excel.Exporter
 
         public string Name { get; set; }
 
-        public bool HeaderIsBold { get; set; }
+        public HeaderStyleAttribute HeaderStyle { get; set; } = new HeaderStyleAttribute();
 
-        public short HeaderFontColor { get; set; } = DefaultStyle.FontColor;
-
-        public int HeaderFontSize { get; set; } = DefaultStyle.FontSize;
-
-        public string HeaderFontName { get; set; } = DefaultStyle.FontName;
-
-        public bool IsBold { get; set; }
-
-        public short FontColor { get; set; } = DefaultStyle.FontColor;
-
-        public int FontSize { get; set; } = DefaultStyle.FontSize;
-
-        public string FontName { get; set; } = DefaultStyle.FontName;
+        public ColumnStyleAttribute ColumnStyle { get; set; } = new ColumnStyleAttribute();
 
         public string StringFormat { get; set; }
+
+        public bool RowMerged { get; set; }
 
         public PropertyInfo PropertyInfo { get; set; }
     }

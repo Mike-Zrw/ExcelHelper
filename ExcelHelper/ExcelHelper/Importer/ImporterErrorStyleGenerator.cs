@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ExcelHelper.Excel.Importer.Models.Import;
-using ExcelHelper.Excel.Importer.Models.Result;
+using ExcelHelper.Importer.Models.Import;
+using ExcelHelper.Importer.Models.Result;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace ExcelHelper.Excel.Importer
+namespace ExcelHelper.Importer
 {
     public class ImporterErrorStyleGenerator
     {

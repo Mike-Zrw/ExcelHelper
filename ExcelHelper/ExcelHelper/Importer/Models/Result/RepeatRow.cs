@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExcelHelper.Excel.Importer.Models.Result
+namespace ExcelHelper.Importer.Models.Result
 {
     public class RepeatRow
     {

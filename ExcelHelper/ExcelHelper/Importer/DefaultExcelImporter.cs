@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using ExcelHelper.Excel.Attributes;
-using ExcelHelper.Excel.Importer.Models;
-using ExcelHelper.Excel.Importer.Models.Import;
-using ExcelHelper.Excel.Importer.Models.Result;
+using ExcelHelper.Attributes;
+using ExcelHelper.Importer.Models;
+using ExcelHelper.Importer.Models.Import;
+using ExcelHelper.Importer.Models.Result;
 using NPOI.SS.UserModel;
 
-namespace ExcelHelper.Excel.Importer
+namespace ExcelHelper.Importer
 {
     /// <summary>
     /// excel导入

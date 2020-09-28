@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NPOI.HSSF.Util;
 
-namespace ExcelHelper.Excel.Importer.Models.Import
+namespace ExcelHelper.Importer.Models.Import
 {
     public class ImportBook
     {

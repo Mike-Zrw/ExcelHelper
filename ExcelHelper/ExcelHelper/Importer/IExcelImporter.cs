@@ -1,8 +1,8 @@
 ﻿using System.IO;
-using ExcelHelper.Excel.Importer.Models.Import;
-using ExcelHelper.Excel.Importer.Models.Result;
+using ExcelHelper.Importer.Models.Import;
+using ExcelHelper.Importer.Models.Result;
 
-namespace ExcelHelper.Excel.Importer
+namespace ExcelHelper.Importer
 {
     /// <summary>
     /// Excel导入

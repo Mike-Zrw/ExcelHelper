@@ -1,7 +1,6 @@
-﻿using ExcelHelper.Excel;
-using ExcelHelper.Excel.Attributes;
-using ExcelHelper.Excel.Importer;
-using ExcelHelper.Excel.Importer.Models.Import;
+﻿using ExcelHelper.Attributes;
+using ExcelHelper.Importer;
+using ExcelHelper.Importer.Models.Import;
 using System;
 using System.IO;
 using Xunit;

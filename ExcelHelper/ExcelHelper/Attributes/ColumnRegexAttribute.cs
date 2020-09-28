@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace ExcelHelper.Excel.Attributes
+namespace ExcelHelper.Attributes
 {
     /// <summary>
     /// 正则判断

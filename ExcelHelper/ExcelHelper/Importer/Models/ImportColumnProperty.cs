@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
-using ExcelHelper.Excel.Attributes;
+using ExcelHelper.Attributes;
 
-namespace ExcelHelper.Excel.Importer.Models
+namespace ExcelHelper.Importer.Models
 {
     public class ImportColumnProperty
     {

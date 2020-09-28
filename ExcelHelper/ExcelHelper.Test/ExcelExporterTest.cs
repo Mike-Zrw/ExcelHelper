@@ -1,9 +1,9 @@
-using ExcelHelper.Excel;
-using ExcelHelper.Excel.Attributes;
-using ExcelHelper.Excel.Exporter;
+using ExcelHelper.Attributes;
+using ExcelHelper.Exporter;
 using NPOI.HSSF.Util;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using Xunit;
 
@@ -37,12 +37,43 @@ namespace ExcelHelper.Test
             //var stream = new MemoryStream();
             exporter.Export(new ExportBook()
             {
-                Ext =ExtEnum.XLSX,
+                Ext = ExtEnum.XLSX,
                 Sheets = new List<ExportSheet> {
                 new ExportSheet(){  SheetName="测试", Data=students},
                 new ExportSheet(){   Data=grades},
-                new ExportSheet(){   Data=schools,Title=new  ExportTitle("学校列表",true,18,default,Excel.Enums.HorizontalAlignEnum.Center),  FilterColumn=new List<string>(){ "学校名称","price" } },
+                new ExportSheet(){   Data=schools,Title=new  ExportTitle("学校列表",true,18,default,HorizontalAlignEnum.Center),  FilterColumn=new List<string>(){ "学校名称","price" } },
                 }
+            }, stream);
+
+            stream.Dispose();
+        }
+
+        [Fact]
+        public void ExportMergeRow()
+        {
+            var orders = new List<Order>();
+            for (int i = 0; i < 100; i++)
+            {
+                var index = new Random(i).Next(i + 10, i + 13);
+                var orderNumber = $"订单{index}";
+                orders.Add(new Order()
+                {
+                    Buyer = $"下单人{index}",
+                    Price = Math.Round(new Random(i).NextDouble(), 2),
+                    BuyQty = new Random(i).Next(1, 10),
+                    ProductName = $"商品{i}",
+                    OrderNumber = orderNumber,
+                    OrderNum2 = orderNumber,
+                    ExportPrimaryKey = orderNumber
+                });
+            }
+            var exporter = new DefaultExcelExporter();
+
+            var stream = new FileStream("D://exportorder.xlsx", FileMode.Create, FileAccess.Write);
+            exporter.Export(new ExportBook()
+            {
+                Ext = ExtEnum.XLSX,
+                Sheets = new List<ExportSheet> { new ExportSheet() { SheetName = "订单列表", Data = orders } }
             }, stream);
 
             stream.Dispose();
@@ -95,5 +126,36 @@ namespace ExcelHelper.Test
             public string Code { get; set; }
         }
 
+        public class Order : ExportModel
+        {
+            [RowMerged]
+            [HeaderStyle(isBold: true)]
+            [ColumnStyle(isBold: true, FontColor = HSSFColor.Blue.Index, VerticalAlign = VerticalAlignmentEnum.Center, HorizontalAlign = HorizontalAlignEnum.Right)]
+            [ColumnNameAttribute("订单编码")]
+            public string OrderNumber { get; set; }
+
+            [RowMerged]
+            [HeaderStyle(isBold: true, VerticalAlign = VerticalAlignmentEnum.Top, HorizontalAlign = HorizontalAlignEnum.Right)]
+            [ColumnStyle(VerticalAlign = VerticalAlignmentEnum.Center, HorizontalAlign = HorizontalAlignEnum.Center)]
+            [ColumnNameAttribute("下单人")]
+            public string Buyer { get; set; }
+
+            [ColumnNameAttribute("商品")]
+            [HeaderStyle(isBold: true)]
+            public string ProductName { get; set; }
+
+
+            [ColumnNameAttribute("价格")]
+            [HeaderStyle(isBold: true)]
+            public double Price { get; set; }
+
+            [ColumnNameAttribute("购买数量")]
+            [HeaderStyle(isBold: true)]
+            public int BuyQty { get; set; }
+
+            [ColumnNameAttribute("订单编码核对")]
+            [HeaderStyle(isBold: true)]
+            public string OrderNum2 { get; set; }
+        }
     }
 }

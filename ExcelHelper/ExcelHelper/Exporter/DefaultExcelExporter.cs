@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using ExcelHelper.Attributes;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 
-namespace ExcelHelper.Excel.Exporter
+namespace ExcelHelper.Exporter
 {
     public class DefaultExcelExporter : IExcelExporter
     {
@@ -43,7 +45,7 @@ namespace ExcelHelper.Excel.Exporter
                 return sheet;
             }
 
-            var columnProperties = GetColumnProperties(data, filterColumn);
+            var columnProperties = this.GetColumnProperties(data, filterColumn);
 
             int rowIndex = 0;
             if (title != null)
@@ -58,7 +60,9 @@ namespace ExcelHelper.Excel.Exporter
             foreach (var item in data)
             {
                 var columnId = 0;
-                var dataRow = sheet.CreateRow(rowIndex++);
+                var dataRow = sheet.CreateRow(rowIndex);
+                item.ExportRowIndex = rowIndex;
+                rowIndex++;
                 foreach (var property in columnProperties)
                 {
                     var cell = dataRow.CreateCell(columnId++);
@@ -85,15 +89,68 @@ namespace ExcelHelper.Excel.Exporter
                 }
             }
 
+            this.RowMerged(data, sheet, columnProperties);
+
             this.SetColumnWidth(sheet, columnProperties);
 
             return sheet;
         }
 
-        private static List<ExportColumnProperty> GetColumnProperties<T>(IEnumerable<T> data, IEnumerable<string> filterColumn)
+        private void RowMerged<T>(IEnumerable<T> listData, ISheet sheet, List<ExportColumnProperty> columnProperties)
             where T : ExportModel
         {
-            var columnProperties = data.GetType().GetGenericArguments()[0].GetProperties().Select(m => new ExportColumnProperty(m)).ToList();
+            if (columnProperties.Any(x => x.RowMerged))
+            {
+                var columnIds = columnProperties.Where(x => x.RowMerged).Select(m => m.ColumnIndex).OrderBy(m => m).ToList();
+                var beginRow = 0;
+                var endRow = 0;
+                T preData = null;
+                foreach (var curData in listData)
+                {
+                    if (preData == null)
+                    {
+                        beginRow = curData.ExportRowIndex;
+                        preData = curData;
+                        continue;
+                    }
+
+                    if (curData.ExportPrimaryKey == preData.ExportPrimaryKey)
+                    {
+                        endRow = curData.ExportRowIndex;
+                    }
+                    else
+                    {
+                        TryMergeRow(sheet, columnIds, beginRow, endRow);
+                        beginRow = curData.ExportRowIndex;
+                        endRow = 0;
+                    }
+
+                    preData = curData;
+                }
+
+                TryMergeRow(sheet, columnIds, beginRow, endRow);
+            }
+
+            void TryMergeRow(ISheet sheet2, List<int> columnIds, int beginRow, int endRow)
+            {
+                if (endRow == 0)
+                {
+                    return;
+                }
+
+                foreach (var columnId in columnIds)
+                {
+                    sheet2.AddMergedRegion(new CellRangeAddress(beginRow, endRow, columnId, columnId));
+                }
+            }
+        }
+
+        private List<ExportColumnProperty> GetColumnProperties<T>(IEnumerable<T> data, IEnumerable<string> filterColumn)
+            where T : ExportModel
+        {
+            var columnProperties = data.GetType().GetGenericArguments()[0].GetProperties()
+                                            .Where(x => x.GetCustomAttribute(typeof(ColumnNameAttribute)) is ColumnNameAttribute)
+                                            .Select(m => new ExportColumnProperty(m)).ToList();
             if (filterColumn?.Any() ?? false)
             {
                 columnProperties.RemoveAll(m => !(filterColumn.Any(p => string.Compare(p, m.Name, true) == 0) || filterColumn.Any(p => string.Compare(p, m.PropertyInfo.Name, true) == 0)));
@@ -135,11 +192,13 @@ namespace ExcelHelper.Excel.Exporter
 
                 var fontStyle = workbook.CreateCellStyle();
                 var font = workbook.CreateFont();
-                font.IsBold = item.HeaderIsBold;
-                font.FontName = item.HeaderFontName;
-                font.FontHeightInPoints = item.HeaderFontSize;
-                font.Color = item.HeaderFontColor;
+                font.IsBold = item.HeaderStyle.IsBold;
+                font.FontName = item.HeaderStyle.FontName;
+                font.FontHeightInPoints = item.HeaderStyle.FontSize;
+                font.Color = item.HeaderStyle.FontColor;
                 fontStyle.SetFont(font);
+                fontStyle.VerticalAlignment = (VerticalAlignment)item.HeaderStyle.VerticalAlign;
+                fontStyle.Alignment = (HorizontalAlignment)item.HeaderStyle.HorizontalAlign;
                 cell.CellStyle = fontStyle;
             }
 
@@ -153,11 +212,13 @@ namespace ExcelHelper.Excel.Exporter
             {
                 var fontStyle = workbook.CreateCellStyle();
                 var font = workbook.CreateFont();
-                font.IsBold = property.IsBold;
-                font.FontName = property.FontName;
-                font.FontHeightInPoints = property.FontSize;
-                font.Color = property.FontColor;
+                font.IsBold = property.ColumnStyle.IsBold;
+                font.FontName = property.ColumnStyle.FontName;
+                font.FontHeightInPoints = property.ColumnStyle.FontSize;
+                font.Color = property.ColumnStyle.FontColor;
                 fontStyle.SetFont(font);
+                fontStyle.VerticalAlignment = (VerticalAlignment)property.ColumnStyle.VerticalAlign;
+                fontStyle.Alignment = (HorizontalAlignment)property.ColumnStyle.HorizontalAlign;
                 cellStyles.Add(property.ColumnIndex, fontStyle);
             });
             return cellStyles;

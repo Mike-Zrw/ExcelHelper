@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ExcelHelper.Excel.Importer.Models.Import;
+using ExcelHelper.Importer.Models.Import;
 
-namespace ExcelHelper.Excel.Importer.Models.Result
+namespace ExcelHelper.Importer.Models.Result
 {
     public interface IResultSheet : IImportSheet
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ExcelHelper.Excel.Attributes
+namespace ExcelHelper.Attributes
 {
     public class StyleAttribute : Attribute
     {
@@ -17,5 +17,9 @@ namespace ExcelHelper.Excel.Attributes
         /// 字体名称
         /// </summary>
         public string FontName { get; set; } = DefaultStyle.FontName;
+
+        public HorizontalAlignEnum HorizontalAlign { get; set; } = HorizontalAlignEnum.Left;
+
+        public VerticalAlignmentEnum VerticalAlign { get; set; } = VerticalAlignmentEnum.Center;
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ExcelHelper.Excel.Attributes
+namespace ExcelHelper.Attributes
 {
     /// <summary>
     /// 内容样式

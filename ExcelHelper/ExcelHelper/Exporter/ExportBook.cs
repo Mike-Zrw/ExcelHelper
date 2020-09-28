@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExcelHelper.Excel.Exporter
+namespace ExcelHelper.Exporter
 {
     public class ExportBook
     {

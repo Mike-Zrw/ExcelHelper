@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ExcelHelper.Excel.Importer.Models.Import
+namespace ExcelHelper.Importer.Models.Import
 {
     public class ImportModel
     {
