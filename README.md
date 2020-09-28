@@ -1,5 +1,6 @@
 # 概述
 基于NPOI的Excel导入导出类库。支持多sheet导入导出。导出字段过滤。特性配置导入验证，非空验证，唯一验证等
+详细描述点击：[https://www.cnblogs.com/bluesummer/p/13744421.html#4694957](https://www.cnblogs.com/bluesummer/p/13744421.html#4694957 "https://www.cnblogs.com/bluesummer/p/13744421.html#4694957")
 
 # 导出配置支持
 
