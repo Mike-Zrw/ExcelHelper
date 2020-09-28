@@ -75,6 +75,9 @@ namespace ExcelHelper.Test
 
     public class ImportStudent : ImportModel
     {
+        [ColumnNameAttribute("Id")]
+        public Guid Id { get; set; }
+
         [ColumnRequired("名字必填")]
         [ColumnNameAttribute("名字")]
         public string Name { get; set; }

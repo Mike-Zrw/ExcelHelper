@@ -187,9 +187,25 @@ namespace ExcelHelper.Importer
                     return;
                 }
 
-                var value = columnProperty.PropertyInfo.IsNullable() ? Convert.ChangeType(cellValue, columnProperty.PropertyInfo.PropertyType.GetGenericArguments()[0]) : Convert.ChangeType(cellValue, columnProperty.PropertyInfo.PropertyType);
-                columnProperty.PropertyInfo.SetValue(rowModel, value);
+                var targetType = columnProperty.PropertyInfo.IsNullable() ? columnProperty.PropertyInfo.PropertyType.GetGenericArguments()[0] : columnProperty.PropertyInfo.PropertyType;
+                columnProperty.PropertyInfo.SetValue(rowModel, this.ConvertValueType(cellValue, targetType));
             }
+        }
+
+        private object ConvertValueType(string cellValue, Type targetType)
+        {
+            object value;
+            switch (targetType.Name)
+            {
+                case "Guid":
+                    value = Guid.Parse(cellValue);
+                    break;
+                default:
+                    value = Convert.ChangeType(cellValue, targetType);
+                    break;
+            }
+
+            return value;
         }
 
         private List<ImportColumnProperty> GetCellProperties(Type modelType, IRow headerRow)

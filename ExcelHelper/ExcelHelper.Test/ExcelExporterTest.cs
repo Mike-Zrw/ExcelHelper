@@ -21,6 +21,7 @@ namespace ExcelHelper.Test
             {
                 students.Add(new ExportStudent
                 {
+                    Id = Guid.NewGuid(),
                     Name = i % 6 == 1 ? null : ($"name{i}"),
                     Age = i,
                     Phone = i % 8 == 1 ? "adsf123" : $"{1}{new Random().Next(100, 999)}{1}{new Random().Next(100, 999)}{2}{new Random().Next(0, 9)}{3}",
@@ -79,8 +80,40 @@ namespace ExcelHelper.Test
             stream.Dispose();
         }
 
+        [Fact]
+        public void ExportByFormat()
+        {
+            var users = new List<User>();
+            for (int i = 0; i < 100; i++)
+            {
+                users.Add(new User()
+                {
+                    IdCard = "3710812001000022" + i.ToString("00")
+                });
+            }
+            var exporter = new DefaultExcelExporter();
+
+            var stream = new FileStream("D://ExportByFormat.xlsx", FileMode.Create, FileAccess.Write);
+            exporter.Export(new ExportBook()
+            {
+                Ext = ExtEnum.XLSX,
+                Sheets = new List<ExportSheet> { new ExportSheet() { Data = users } }
+            }, stream);
+
+            stream.Dispose();
+        }
+        public class User : ExportModel
+        {
+
+            [ColumnNameAttribute("身份证")]
+            public string IdCard { get; set; }
+
+        }
+
         public class ExportStudent : ExportModel
         {
+            [ColumnNameAttribute("Id")]
+            public Guid Id { get; set; }
             [ColumnNameAttribute("名字")]
             public string Name { get; set; }
             [ColumnNameAttribute("年龄")]
@@ -124,7 +157,7 @@ namespace ExcelHelper.Test
 
             [ColumnWidth(0, 5000)]
             [HeaderStyle(true, FontColor = HSSFColor.Blue.Index)]
-            [ColumnStyle(WrapText = false,FontSize =9)]
+            [ColumnStyle(WrapText = false, FontSize = 9)]
             [ColumnNameAttribute("年级编码")]
             public string Code { get; set; }
         }
