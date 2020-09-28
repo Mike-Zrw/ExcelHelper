@@ -28,7 +28,7 @@ namespace ExcelHelper.Test
                     Money = Math.Round(new Random(i).NextDouble(), 2),
                     SchoolDate = DateTime.Now.AddDays(i + 1),
                 });
-                grades.Add(new ExportGrade { Code = $"编码{i}", GradeName = $"{i}年级" });
+                grades.Add(new ExportGrade { Code = $"编码编码编码编码编码{i}", GradeName = $"{i}年级年级年级年级年级年级年级年级年级年级" });
                 schools.Add(new ExportSchool { Name = $"{i}号学校", Address = $"学校地址{i}", Price = Math.Round(new Random().NextDouble(), 2) });
             }
             var exporter = new DefaultExcelExporter();
@@ -117,11 +117,14 @@ namespace ExcelHelper.Test
 
         public class ExportGrade : ExportModel
         {
+            [ColumnWidth(0, 10000)]
             [HeaderStyle(true)]
             [ColumnNameAttribute("年级名称")]
             public string GradeName { get; set; }
 
+            [ColumnWidth(0, 5000)]
             [HeaderStyle(true, FontColor = HSSFColor.Blue.Index)]
+            [ColumnStyle(WrapText = false,FontSize =9)]
             [ColumnNameAttribute("年级编码")]
             public string Code { get; set; }
         }

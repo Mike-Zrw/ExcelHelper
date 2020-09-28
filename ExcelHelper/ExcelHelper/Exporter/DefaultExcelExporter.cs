@@ -219,6 +219,7 @@ namespace ExcelHelper.Exporter
                 fontStyle.SetFont(font);
                 fontStyle.VerticalAlignment = (VerticalAlignment)property.ColumnStyle.VerticalAlign;
                 fontStyle.Alignment = (HorizontalAlignment)property.ColumnStyle.HorizontalAlign;
+                fontStyle.WrapText = property.ColumnStyle.WrapText;
                 cellStyles.Add(property.ColumnIndex, fontStyle);
             });
             return cellStyles;

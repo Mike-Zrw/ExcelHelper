@@ -16,5 +16,10 @@ namespace ExcelHelper.Attributes
         public ColumnStyleAttribute()
         {
         }
+
+        /// <summary>
+        /// 自动换行
+        /// </summary>
+        public bool WrapText { get; set; } = true;
     }
 }
