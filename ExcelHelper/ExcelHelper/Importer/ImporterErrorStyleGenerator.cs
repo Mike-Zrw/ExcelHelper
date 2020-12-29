@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using ExcelHelper.Importer.Models.Import;
-using ExcelHelper.Importer.Models.Result;
+﻿using ExcelHelper.Importer.Dtos;
 using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ExcelHelper.Importer
 {
@@ -15,34 +13,24 @@ namespace ExcelHelper.Importer
         private readonly ICellStyle _rowRepeatedErrorStyle;
         private readonly ICreationHelper _commentFactory;
         private readonly IClientAnchor _commentAnchor;
-
         public ImporterErrorStyleGenerator(IWorkbook workBook, short dataErrorForegroundColor, short repeatedErrorForegroundColor, short defaultForegroundColor)
         {
-            this.DataErrorForegroundColor = dataErrorForegroundColor;
-            this.RepeatedErrorForegroundColor = repeatedErrorForegroundColor;
-            this.DefaultForegroundColor = defaultForegroundColor;
 
-            this._workBook = workBook;
-            this._defaultStyle = this._workBook.CreateCellStyle();
-            this._defaultStyle.FillForegroundColor = defaultForegroundColor;
+            _workBook = workBook;
+            _defaultStyle = _workBook.CreateCellStyle();
+            _defaultStyle.FillForegroundColor = defaultForegroundColor;
 
-            this._dataErrorStyle = this._workBook.CreateCellStyle();
-            this._dataErrorStyle.FillForegroundColor = dataErrorForegroundColor;
-            this._dataErrorStyle.FillPattern = FillPattern.SolidForeground;
+            _dataErrorStyle = _workBook.CreateCellStyle();
+            _dataErrorStyle.FillForegroundColor = dataErrorForegroundColor;
+            _dataErrorStyle.FillPattern = FillPattern.SolidForeground;
 
-            this._rowRepeatedErrorStyle = this._workBook.CreateCellStyle();
-            this._rowRepeatedErrorStyle.FillForegroundColor = repeatedErrorForegroundColor;
-            this._rowRepeatedErrorStyle.FillPattern = FillPattern.SolidForeground;
+            _rowRepeatedErrorStyle = _workBook.CreateCellStyle();
+            _rowRepeatedErrorStyle.FillForegroundColor = repeatedErrorForegroundColor;
+            _rowRepeatedErrorStyle.FillPattern = FillPattern.SolidForeground;
 
-            this._commentFactory = this._workBook.GetCreationHelper();
-            this._commentAnchor = this._commentFactory.CreateClientAnchor();
+            _commentFactory = _workBook.GetCreationHelper();
+            _commentAnchor = _commentFactory.CreateClientAnchor();
         }
-
-        public short DataErrorForegroundColor { get; set; }
-
-        public short RepeatedErrorForegroundColor { get; set; }
-
-        public short DefaultForegroundColor { get; set; }
 
         public void InitStyle(ISheet sheet, int headerRowIndex)
         {
@@ -52,31 +40,32 @@ namespace ExcelHelper.Importer
                 foreach (var cell in row.Cells)
                 {
                     cell.CellComment = null;
-                    if (cell.CellStyle == null || (cell.CellStyle.FillForegroundColor != this.DataErrorForegroundColor && cell.CellStyle.FillForegroundColor != this.RepeatedErrorForegroundColor))
+                    if (cell.CellStyle == null || (cell.CellStyle.FillForegroundColor != _dataErrorStyle.FillForegroundColor && cell.CellStyle.FillForegroundColor != _rowRepeatedErrorStyle.FillForegroundColor))
                     {
                         continue;
                     }
 
-                    cell.CellStyle = this._defaultStyle;
+                    if (cell.CellStyle != null)
+                        cell.CellStyle.FillForegroundColor = _defaultStyle.FillForegroundColor;
                 }
             }
         }
 
-        public void SetErrorStyle(ISheet sheet, IResultSheet sheetModel)
+        public void SetSheetErrorStyle(ISheet sheet, IResultSheet sheetModel)
         {
             var commentDrawing = sheet.CreateDrawingPatriarch();
             if (sheetModel.ErrorRows?.Any() ?? false)
             {
-                this.SetDataErrorStyle(sheet, commentDrawing, sheetModel.ErrorRows);
+                SetSheetDataErrorStyle(sheet, commentDrawing, sheetModel.ErrorRows);
             }
 
             if (!sheetModel.IsUniqueValidated)
             {
-                this.SetRowRepeatedErrorStyle(sheet, commentDrawing, sheetModel.RepeatedRowIndexes, sheetModel.UniqueValidationPrompt);
+                SetSheetRowRepeatedErrorStyle(sheet, commentDrawing, sheetModel.RepeatedRowIndexes, sheetModel.UniqueValidationPrompt);
             }
         }
 
-        private void SetDataErrorStyle(ISheet sheet, IDrawing commentDrawing, IEnumerable<ImportModel> errorRows)
+        private void SetSheetDataErrorStyle(ISheet sheet, IDrawing commentDrawing, IEnumerable<SheetRow> errorRows)
         {
             foreach (var item in errorRows)
             {
@@ -88,19 +77,19 @@ namespace ExcelHelper.Importer
                         cell = sheet.GetRow(item.RowIndex).CreateCell(errorColumn.Key);
                     }
 
-                    cell.CellStyle = this._dataErrorStyle;
+                    SetCellErrorStyle(cell, _dataErrorStyle);
 
                     if (cell.CellComment == null)
                     {
                         cell.CellComment = commentDrawing.CreateCellComment(this._commentAnchor);
                     }
 
-                    cell.CellComment.String = this._commentFactory.CreateRichTextString(errorColumn.Value);
+                    cell.CellComment.String = _commentFactory.CreateRichTextString(errorColumn.Value);
                 }
             }
         }
 
-        private void SetRowRepeatedErrorStyle(ISheet sheet, IDrawing commentDrawing, List<List<RepeatRow>> rowGroups, string errorPrompt)
+        private void SetSheetRowRepeatedErrorStyle(ISheet sheet, IDrawing commentDrawing, List<List<RepeatRow>> rowGroups, string errorPrompt)
         {
             foreach (var rows in rowGroups)
             {
@@ -112,21 +101,33 @@ namespace ExcelHelper.Importer
                     foreach (var columnIndex in repeatRow.ColumnIndexes)
                     {
                         var cell = row.GetCell(columnIndex);
-                        cell.CellStyle = this._rowRepeatedErrorStyle;
-                        if (setedComment)
-                        {
-                            continue;
-                        }
 
-                        if (cell.CellComment == null)
-                        {
-                            cell.CellComment = commentDrawing.CreateCellComment(this._commentAnchor);
-                        }
+                        SetCellErrorStyle(cell, _rowRepeatedErrorStyle);
 
-                        cell.CellComment.String = this._commentFactory.CreateRichTextString($"{errorPrompt}.重复行：{string.Join(",", rows.Where(m => m.RowIndex != repeatRow.RowIndex).Select(m => m.RowIndex + 1))}");
+                        if (setedComment) continue;
+
+                        if (cell.CellComment == null) cell.CellComment = commentDrawing.CreateCellComment(this._commentAnchor);
+
+                        cell.CellComment.String = _commentFactory.CreateRichTextString($"{errorPrompt}.重复行：{string.Join(",", rows.Where(m => m.RowIndex != repeatRow.RowIndex).Select(m => m.RowIndex + 1))}");
                         setedComment = true;
                     }
                 }
+            }
+        }
+
+        private void SetCellErrorStyle(ICell cell, ICellStyle errorStyle)
+        {
+            if (cell.CellStyle == null)
+            {
+                cell.CellStyle = errorStyle;
+            }
+            else
+            {
+                var style = _workBook.CreateCellStyle();
+                style.CloneStyleFrom(cell.CellStyle); ;
+                style.FillForegroundColor = errorStyle.FillForegroundColor;
+                style.FillPattern = errorStyle.FillPattern;
+                cell.CellStyle = style;
             }
         }
     }

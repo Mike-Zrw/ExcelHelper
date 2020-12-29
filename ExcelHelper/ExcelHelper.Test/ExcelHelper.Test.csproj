@@ -17,4 +17,13 @@
     <ProjectReference Include="..\ExcelHelper\ExcelHelper.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Excels\Export.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Excels\Simple.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

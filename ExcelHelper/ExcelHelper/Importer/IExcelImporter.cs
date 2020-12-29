@@ -1,6 +1,5 @@
-﻿using System.IO;
-using ExcelHelper.Importer.Models.Import;
-using ExcelHelper.Importer.Models.Result;
+﻿using ExcelHelper.Importer.Dtos;
+using System.IO;
 
 namespace ExcelHelper.Importer
 {

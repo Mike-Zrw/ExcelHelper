@@ -1,11 +1,12 @@
-﻿using System;
+﻿using ExcelHelper.Attributes;
+using ExcelHelper.Exporter.Dtos;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using ExcelHelper.Attributes;
-using NPOI.SS.UserModel;
-using NPOI.SS.Util;
 
 namespace ExcelHelper.Exporter
 {
@@ -36,8 +37,8 @@ namespace ExcelHelper.Exporter
             return stream;
         }
 
-        public ISheet CreateSheet<T>(IWorkbook workbook, string sheetName, ExportTitle title, IEnumerable<T> data, IEnumerable<string> filterColumn)
-            where T : ExportModel
+        public ISheet CreateSheet<T>(IWorkbook workbook, string sheetName, SheetTitle title, IEnumerable<T> data, IEnumerable<string> filterColumn)
+            where T : SheetRow
         {
             var sheet = string.IsNullOrWhiteSpace(sheetName) ? workbook.CreateSheet() : workbook.CreateSheet(sheetName);
             if (data == null)
@@ -97,7 +98,7 @@ namespace ExcelHelper.Exporter
         }
 
         private void RowMerged<T>(IEnumerable<T> listData, ISheet sheet, List<ExportColumnProperty> columnProperties)
-            where T : ExportModel
+            where T : SheetRow
         {
             if (columnProperties.Any(x => x.RowMerged))
             {
@@ -146,7 +147,7 @@ namespace ExcelHelper.Exporter
         }
 
         private List<ExportColumnProperty> GetColumnProperties<T>(IEnumerable<T> data, IEnumerable<string> filterColumn)
-            where T : ExportModel
+            where T : SheetRow
         {
             var columnProperties = data.GetType().GetGenericArguments()[0].GetProperties()
                                             .Where(x => x.GetCustomAttribute(typeof(ColumnNameAttribute)) is ColumnNameAttribute)
@@ -164,7 +165,7 @@ namespace ExcelHelper.Exporter
             return columnProperties;
         }
 
-        private void CreatetTitle(IWorkbook workbook, ExportTitle title, ISheet sheet, int columnCount)
+        private void CreatetTitle(IWorkbook workbook, SheetTitle title, ISheet sheet, int columnCount)
         {
             ICellStyle cellstyle = workbook.CreateCellStyle();
             cellstyle.Alignment = (HorizontalAlignment)title.HorizontalAlign;

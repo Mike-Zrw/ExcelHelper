@@ -1,14 +1,12 @@
-﻿using System;
+﻿using ExcelHelper.Attributes;
+using ExcelHelper.Importer.Dtos;
+using NPOI.SS.UserModel;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using ExcelHelper.Attributes;
-using ExcelHelper.Importer.Models;
-using ExcelHelper.Importer.Models.Import;
-using ExcelHelper.Importer.Models.Result;
-using NPOI.SS.UserModel;
 
 namespace ExcelHelper.Importer
 {
@@ -59,7 +57,7 @@ namespace ExcelHelper.Importer
                 if (outPutErrorStream != null)
                 {
                     errorStyleGenerator.InitStyle(sheet, sheetModel.HeaderRowIndex);
-                    errorStyleGenerator.SetErrorStyle(sheet, sheetModel);
+                    errorStyleGenerator.SetSheetErrorStyle(sheet, sheetModel);
                 }
             }
 
@@ -71,7 +69,7 @@ namespace ExcelHelper.Importer
             return ret;
         }
 
-        private IResultSheet CreateResultSheetInstance(Type genericType, IImportSheet sheetModel)
+        private IResultSheet CreateResultSheetInstance(Type genericType, IBookSheet sheetModel)
         {
             var instance = (IResultSheet)Activator.CreateInstance(typeof(ResultSheet<>).MakeGenericType(genericType));
 
@@ -105,7 +103,7 @@ namespace ExcelHelper.Importer
         }
 
         private IEnumerable<T> FillSheetRow<T>(ISheet sheet, int headerRowIndex)
-            where T : ImportModel
+            where T : SheetRow
         {
             var headerRow = sheet.GetRow(headerRowIndex);
             var modelType = typeof(T);
@@ -114,12 +112,13 @@ namespace ExcelHelper.Importer
             for (var rowIndex = headerRowIndex + 1; rowIndex <= sheet.LastRowNum; rowIndex++)
             {
                 var row = sheet.GetRow(rowIndex);
-                if (row == null || row.FirstCellNum < 0)
+                if (row == null || row.FirstCellNum < 0 || RowIsEmpty(row, headerRow.LastCellNum))
                 {
                     continue;
                 }
 
-                var rowModel = (ImportModel)Activator.CreateInstance(modelType, null);
+
+                var rowModel = (SheetRow)Activator.CreateInstance(modelType, null);
 
                 rowModel.SetColumnProperties(columnProperties);
                 rowModel.RowIndex = rowIndex;
@@ -149,6 +148,25 @@ namespace ExcelHelper.Importer
             }
         }
 
+        private bool RowIsEmpty(IRow row, int cellCount)
+        {
+            try
+            {
+                for (int cellIndex = 0; cellIndex < cellCount; cellIndex++)
+                {
+                    if (!string.IsNullOrWhiteSpace(CellValueHelper.GetCellValue(row.GetCell(cellIndex))))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         private string ValidateSheetFormat<T>(ISheet sheet, int headerRowIndex)
         {
             var headerRow = sheet.GetRow(headerRowIndex);
@@ -168,7 +186,7 @@ namespace ExcelHelper.Importer
             return string.Empty;
         }
 
-        private void FillPropertyValue(ImportModel rowModel, ImportColumnProperty columnProperty, ICell cell)
+        private void FillPropertyValue(SheetRow rowModel, ImportColumnProperty columnProperty, ICell cell)
         {
             var cellValue = cell == null ? null : CellValueHelper.GetCellValue(cell);
 
