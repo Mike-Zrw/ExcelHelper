@@ -1,5 +1,4 @@
-﻿using ExcelHelper.Attributes;
-using ExcelHelper.Importer.Attributes;
+﻿using ExcelHelper.Importer.Attributes;
 using System.Reflection;
 using System.Text.RegularExpressions;
 

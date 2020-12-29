@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ExcelHelper.Attributes
+namespace ExcelHelper
 {
     /// <summary>
     /// 列名
