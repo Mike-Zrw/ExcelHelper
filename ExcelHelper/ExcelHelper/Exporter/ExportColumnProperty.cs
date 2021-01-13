@@ -16,12 +16,12 @@ namespace ExcelHelper.Exporter
 
             if (property.GetCustomAttribute(typeof(HeaderStyleAttribute)) is HeaderStyleAttribute headerAttr)
             {
-                this.HeaderStyle = headerAttr;
+                this.HeaderStyle = headerAttr.Style;
             }
 
             if (property.GetCustomAttribute(typeof(ColumnStyleAttribute)) is ColumnStyleAttribute columnAttr)
             {
-                this.ColumnStyle = columnAttr;
+                this.ColumnStyle = columnAttr.Style;
             }
 
             if (property.GetCustomAttribute(typeof(StringFormatterAttribute)) is StringFormatterAttribute formatAttr)
@@ -45,9 +45,9 @@ namespace ExcelHelper.Exporter
 
         public string Name { get; set; }
 
-        public HeaderStyleAttribute HeaderStyle { get; set; } = new HeaderStyleAttribute();
+        public IBaseStyle HeaderStyle { get; set; } = new CellStyle();
 
-        public ColumnStyleAttribute ColumnStyle { get; set; } = new ColumnStyleAttribute();
+        public IBaseStyle ColumnStyle { get; set; } = new CellStyle();
 
         public string StringFormat { get; set; }
 

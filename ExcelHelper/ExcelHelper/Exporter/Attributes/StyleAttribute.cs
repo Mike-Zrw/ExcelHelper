@@ -5,22 +5,18 @@ namespace ExcelHelper.Exporter.Attributes
 {
     public class StyleAttribute : Attribute
     {
-        /// <summary>
-        /// 加粗
-        /// </summary>
-        public bool IsBold { get; set; }
-
-        public short FontColor { get; set; } = DefaultStyle.FontColor;
-
-        public int FontSize { get; set; } = DefaultStyle.FontSize;
-
-        /// <summary>
-        /// 字体名称
-        /// </summary>
-        public string FontName { get; set; } = DefaultStyle.FontName;
-
-        public HorizontalAlignEnum HorizontalAlign { get; set; } = HorizontalAlignEnum.Left;
-
-        public VerticalAlignmentEnum VerticalAlign { get; set; } = VerticalAlignmentEnum.Center;
+        public StyleAttribute()
+        {
+            Style = new CellStyle();
+        }
+        public IBaseStyle Style { get; set; }
+        public bool IsBold { get => Style.IsBold; set => Style.IsBold = value; }
+        public bool WrapText { get => Style.WrapText; set => Style.WrapText = value; }
+        public short FontColor { get => Style.FontColor; set => Style.FontColor = value; }
+        public short FillForegroundColor { get => Style.FillForegroundColor; set => Style.FillForegroundColor = value; }
+        public int FontSize { get => Style.FontSize; set => Style.FontSize = value; }
+        public string FontName { get => Style.FontName; set => Style.FontName = value; }
+        public HorizontalAlignEnum HorizontalAlign { get => Style.HorizontalAlign; set => Style.HorizontalAlign = value; }
+        public VerticalAlignmentEnum VerticalAlign { get => Style.VerticalAlign; set => Style.VerticalAlign = value; }
     }
 }

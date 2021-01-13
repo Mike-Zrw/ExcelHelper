@@ -10,16 +10,11 @@ namespace ExcelHelper.Exporter.Attributes
     {
         public ColumnStyleAttribute(bool isBold)
         {
-            this.IsBold = isBold;
+            this.Style.IsBold = isBold;
         }
 
         public ColumnStyleAttribute()
         {
         }
-
-        /// <summary>
-        /// 自动换行
-        /// </summary>
-        public bool WrapText { get; set; } = true;
     }
 }

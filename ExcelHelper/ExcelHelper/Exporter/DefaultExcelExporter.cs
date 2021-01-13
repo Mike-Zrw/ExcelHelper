@@ -56,7 +56,6 @@ namespace ExcelHelper.Exporter
 
             this.CreateHeader(workbook, sheet, columnProperties, rowIndex++);
 
-            var columnStyles = this.CreateColumnStyles(workbook, columnProperties);
             foreach (var item in data)
             {
                 var columnId = 0;
@@ -85,7 +84,10 @@ namespace ExcelHelper.Exporter
                     }
 
                     cell.SetCellValue(valueStr);
-                    cell.CellStyle = columnStyles[property.ColumnIndex];
+                    IBaseStyle cellstyle = null;
+                    if ((item.CellStyles?.Any() ?? false) && item.CellStyles.ContainsKey(property.PropertyInfo.Name))
+                        cellstyle = item.CellStyles[property.PropertyInfo.Name];
+                    SetCellStyle(workbook, cell, property, cellstyle);
                 }
             }
 
@@ -199,6 +201,12 @@ namespace ExcelHelper.Exporter
                 fontStyle.SetFont(font);
                 fontStyle.VerticalAlignment = (VerticalAlignment)item.HeaderStyle.VerticalAlign;
                 fontStyle.Alignment = (HorizontalAlignment)item.HeaderStyle.HorizontalAlign;
+                fontStyle.WrapText = item.HeaderStyle.WrapText;
+                if (item.HeaderStyle.FillForegroundColor != 0)
+                {
+                    fontStyle.FillPattern = FillPattern.SolidForeground;
+                    fontStyle.FillForegroundColor = item.HeaderStyle.FillForegroundColor;
+                }
                 cell.CellStyle = fontStyle;
             }
 
@@ -223,6 +231,26 @@ namespace ExcelHelper.Exporter
                 cellStyles.Add(property.ColumnIndex, fontStyle);
             });
             return cellStyles;
+        }
+        private void SetCellStyle(IWorkbook workbook, ICell cell, ExportColumnProperty property, IBaseStyle cellStyle = null)
+        {
+            var style = cellStyle ?? property.ColumnStyle;
+            var fontStyle = workbook.CreateCellStyle();
+            var font = workbook.CreateFont();
+            font.IsBold = style.IsBold;
+            font.FontName = style.FontName;
+            font.FontHeightInPoints = style.FontSize;
+            font.Color = style.FontColor;
+            fontStyle.SetFont(font);
+            fontStyle.VerticalAlignment = (VerticalAlignment)style.VerticalAlign;
+            fontStyle.Alignment = (HorizontalAlignment)style.HorizontalAlign;
+            if (style.FillForegroundColor != 0)
+            {
+                fontStyle.FillPattern = FillPattern.SolidForeground;
+                fontStyle.FillForegroundColor = style.FillForegroundColor;
+            }
+            fontStyle.WrapText = style.WrapText;
+            cell.CellStyle = fontStyle;
         }
 
         private void SetColumnWidth(ISheet sheet, List<ExportColumnProperty> columnProperties)

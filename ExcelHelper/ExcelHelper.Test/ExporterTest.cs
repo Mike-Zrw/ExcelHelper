@@ -35,7 +35,10 @@ namespace ExcelHelper.Test
                     Money = Math.Round(new Random(i).NextDouble(), 2),
                     SchoolDate = DateTime.Now.AddDays(i + 1),
                 });
-                grades.Add(new ExportGrade { Code = $"编码编码编码编码编码{i}", GradeName = $"{i}年级年级年级年级年级年级年级年级年级年级" });
+                var grade = new ExportGrade { Code = $"编码编码编码编码编码{i}", GradeName = $"{i}年级年级年级年级年级年级年级年级年级年级" };
+                if (i % 11 == 1)
+                    grade.SetCellStyle(nameof(grade.Code), new CellStyle() { FillForegroundColor = HSSFColor.Red.Index, FontColor = HSSFColor.Blue.Index });
+                grades.Add(grade);
                 schools.Add(new ExportSchool { Name = $"{i}号学校", Address = $"学校地址{i}", Price = Math.Round(new Random().NextDouble(), 2) });
             }
 

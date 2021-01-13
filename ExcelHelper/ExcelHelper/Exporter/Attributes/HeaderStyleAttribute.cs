@@ -10,7 +10,7 @@ namespace ExcelHelper.Exporter.Attributes
     {
         public HeaderStyleAttribute(bool isBold)
         {
-            this.IsBold = isBold;
+            this.Style.IsBold = isBold;
         }
 
         public HeaderStyleAttribute()
