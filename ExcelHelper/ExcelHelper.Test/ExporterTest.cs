@@ -98,15 +98,17 @@ namespace ExcelHelper.Test
                 });
             }
 
+
             var stream = new FileStream("E://ExportByFormat.xlsx", FileMode.Create, FileAccess.Write);
-            _exporter.Export(new ExportBook()
+            var byt = _exporter.Export(new ExportBook()
             {
                 Ext = ExtEnum.XLSX,
                 Sheets = new List<BookSheet> { new BookSheet() { Data = users } }
-            }, stream);
-
+            });
+            stream.Write(byt, 0, byt.Length);
             stream.Dispose();
         }
+
 
         public class User : SheetRow
         {

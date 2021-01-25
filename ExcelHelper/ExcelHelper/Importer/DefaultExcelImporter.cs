@@ -12,8 +12,9 @@ namespace ExcelHelper.Importer
     /// <summary>
     /// excel导入
     /// </summary>
-    public class DefaultExcelImporter : IExcelImporter
+    public class DefaultExcelImporter : IExcelImporter, IDisposable
     {
+        private IWorkbook workbook;
         /// <summary>
         /// 导入Excel
         /// </summary>
@@ -27,7 +28,7 @@ namespace ExcelHelper.Importer
             var ret = new ImportResult();
             var sheets = importBook.Sheets.Select(m => this.CreateResultSheetInstance(m.GetType().GenericTypeArguments[0], m)).ToArray();
             ret.SetSheets(sheets);
-            IWorkbook workbook;
+
             try
             {
                 workbook = WorkbookGenerator.GetIWorkbook(fileStream, ext);
@@ -266,6 +267,12 @@ namespace ExcelHelper.Importer
             }
 
             return columnProperties;
+        }
+
+        public void Dispose()
+        {
+            if (workbook != null)
+                workbook.Close();
         }
     }
 }

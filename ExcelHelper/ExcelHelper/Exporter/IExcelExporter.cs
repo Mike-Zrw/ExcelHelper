@@ -5,6 +5,8 @@ namespace ExcelHelper.Exporter
 {
     public interface IExcelExporter
     {
-        Stream Export(ExportBook book, Stream stream);
+        void Export(ExportBook book, Stream stream);
+        
+        byte[] Export(ExportBook book);
     }
 }
