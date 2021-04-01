@@ -28,5 +28,10 @@ namespace ExcelHelper.Exporter
 
         public VerticalAlignmentEnum VerticalAlign { get; set; } = DefaultStyle.VerticalAlign;
         public short FillForegroundColor { get; set; }
+
+        public override string ToString()
+        {
+            return $"{IsBold}{WrapText}{FontColor}{FontSize}{FontName}{HorizontalAlign}{VerticalAlign}{FillForegroundColor}";
+        }
     }
 }

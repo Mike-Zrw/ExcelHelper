@@ -63,6 +63,7 @@ namespace ExcelHelper.Exporter
 
             this.CreateHeader(sheet, columnProperties, rowIndex++);
 
+            var cacheStyles = new Dictionary<string, ICellStyle>();
             foreach (var item in data)
             {
                 var columnId = 0;
@@ -94,7 +95,7 @@ namespace ExcelHelper.Exporter
                     IBaseStyle cellstyle = null;
                     if ((item.CellStyles?.Any() ?? false) && item.CellStyles.ContainsKey(property.PropertyInfo.Name))
                         cellstyle = item.CellStyles[property.PropertyInfo.Name];
-                    SetCellStyle(cell, property, cellstyle);
+                    SetCellStyle(cell, cacheStyles, property, cellstyle);
                 }
             }
 
@@ -239,9 +240,14 @@ namespace ExcelHelper.Exporter
             });
             return cellStyles;
         }
-        private void SetCellStyle(ICell cell, ExportColumnProperty property, IBaseStyle cellStyle = null)
+        private void SetCellStyle(ICell cell, Dictionary<string, ICellStyle> cacheStyles, ExportColumnProperty property, IBaseStyle cellStyle = null)
         {
             var style = cellStyle ?? property.ColumnStyle;
+            if (cacheStyles.ContainsKey(style.ToString()))
+            {
+                cell.CellStyle = cacheStyles[style.ToString()];
+                return;
+            }
             var fontStyle = workbook.CreateCellStyle();
             var font = workbook.CreateFont();
             font.IsBold = style.IsBold;
@@ -258,6 +264,7 @@ namespace ExcelHelper.Exporter
             }
             fontStyle.WrapText = style.WrapText;
             cell.CellStyle = fontStyle;
+            cacheStyles.Add(style.ToString(), fontStyle);
         }
 
         private void SetColumnWidth(ISheet sheet, List<ExportColumnProperty> columnProperties)
