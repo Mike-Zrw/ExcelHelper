@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ExcelHelper.Importer.Dtos
+namespace ExcelHelper.Importer.Dto
 {
     public class ImportResult
     {
@@ -19,7 +19,7 @@ namespace ExcelHelper.Importer.Dtos
         {
             get
             {
-                return string.IsNullOrWhiteSpace(this.BookFormatErrorMessage) && !this.Sheets.Any(p => !p.IsValidated);
+                return string.IsNullOrWhiteSpace(this.BookFormatErrorMessage) && this.Sheets.All(p => p.IsValidated);
             }
         }
 

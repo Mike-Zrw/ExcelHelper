@@ -1,4 +1,5 @@
-﻿using ExcelHelper.Importer.Dtos;
+﻿using ExcelHelper.Common;
+using ExcelHelper.Importer.Dto;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace ExcelHelper.Importer
     /// </summary>
     public class DefaultExcelImporter : IExcelImporter, IDisposable
     {
-        private IWorkbook workbook;
+        private IWorkbook _workBook;
         /// <summary>
         /// 导入Excel
         /// </summary>
@@ -31,7 +32,7 @@ namespace ExcelHelper.Importer
 
             try
             {
-                workbook = WorkbookGenerator.GetIWorkbook(fileStream, ext);
+                _workBook = WorkbookGenerator.GetIWorkbook(fileStream, ext);
             }
             catch (Exception ex)
             {
@@ -39,11 +40,11 @@ namespace ExcelHelper.Importer
                 return ret;
             }
 
-            var errorStyleGenerator = new ImporterErrorStyleGenerator(workbook, importBook.DataErrorForegroundColor, importBook.RepeatedErrorForegroundColor, importBook.DefaultForegroundColor);
+            var errorStyleGenerator = new ImporterErrorStyleGenerator(_workBook, importBook.DataErrorForegroundColor, importBook.RepeatedErrorForegroundColor, importBook.DefaultForegroundColor);
 
-            for (var i = 0; i < workbook.NumberOfSheets; i++)
+            for (var i = 0; i < _workBook.NumberOfSheets; i++)
             {
-                var sheet = workbook.GetSheetAt(i);
+                var sheet = _workBook.GetSheetAt(i);
                 var sheetModel = ret.Sheets.FirstOrDefault(m => m.SheetIndex == i || m.SheetName == sheet.SheetName);
                 if (sheetModel == null)
                 {
@@ -63,7 +64,7 @@ namespace ExcelHelper.Importer
 
             if (outPutErrorStream != null)
             {
-                workbook.Write(outPutErrorStream);
+                _workBook.Write(outPutErrorStream);
             }
 
             return ret;
@@ -82,24 +83,30 @@ namespace ExcelHelper.Importer
             return instance;
         }
 
-        private IResultSheet ParseSheetToModel(ISheet sheet, IResultSheet sheetModel)
+        private void ParseSheetToModel(ISheet sheet, IResultSheet sheetModel)
         {
             var sheetModelType = sheetModel.GetType();
-            var validateSheetMethod = this.GetType().GetMethod(nameof(this.ValidateSheetFormat), BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(sheetModelType.GetGenericArguments()[0]);
+            var validateSheetMethod = this.GetType().GetMethod(nameof(this.ValidateSheetFormat), BindingFlags.NonPublic | BindingFlags.Instance)?.MakeGenericMethod(sheetModelType.GetGenericArguments()[0]);
+            if (validateSheetMethod == null) throw new NullReferenceException("ValidateSheetFormat Method is null");
+
             var validateSheetResult = validateSheetMethod.Invoke(this, new object[] { sheet, sheetModel.HeaderRowIndex }).ToString();
             if (!string.IsNullOrWhiteSpace(validateSheetResult))
             {
                 sheetModel.SheetFormatErrorMessage = validateSheetResult;
-                return sheetModel;
+                return;
             }
 
-            var sheetToModelMethod = this.GetType().GetMethod(nameof(this.FillSheetRow), BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(sheetModelType.GetGenericArguments()[0]);
+            var sheetToModelMethod = this.GetType().GetMethod(nameof(this.FillSheetRow), BindingFlags.NonPublic | BindingFlags.Instance)?.MakeGenericMethod(sheetModelType.GetGenericArguments()[0]);
+            if (sheetToModelMethod == null) throw new NullReferenceException("FillSheetRow Method is null");
+
             var data = sheetToModelMethod.Invoke(this, new object[] { sheet, sheetModel.HeaderRowIndex });
 
-            sheetModelType.GetMethod("SetData", BindingFlags.Public | BindingFlags.Instance).Invoke(sheetModel, new object[] { data });
+            var setDataMethod = sheetModelType.GetMethod("SetData", BindingFlags.Public | BindingFlags.Instance);
+            if (setDataMethod == null) throw new NullReferenceException("SetData Method is null");
+
+            setDataMethod.Invoke(sheetModel, new[] { data });
 
             sheetModel.Validate();
-            return sheetModel;
         }
 
         private IEnumerable<T> FillSheetRow<T>(ISheet sheet, int headerRowIndex)
@@ -116,17 +123,16 @@ namespace ExcelHelper.Importer
                 {
                     continue;
                 }
-
-
+                
                 var rowModel = (SheetRow)Activator.CreateInstance(modelType, null);
 
                 rowModel.SetColumnProperties(columnProperties);
                 rowModel.RowIndex = rowIndex;
 
-                var indextoProperty = columnProperties.ToDictionary(m => m.ColumnIndex, m => m);
+                var indexProperty = columnProperties.ToDictionary(m => m.ColumnIndex, m => m);
                 for (int cellIndex = 0; cellIndex < headerRow.LastCellNum; cellIndex++)
                 {
-                    if (!indextoProperty.TryGetValue(cellIndex, out ImportColumnProperty columnProperty))
+                    if (!indexProperty.TryGetValue(cellIndex, out ImportColumnProperty columnProperty))
                     {
                         continue;
                     }
@@ -271,8 +277,8 @@ namespace ExcelHelper.Importer
 
         public void Dispose()
         {
-            if (workbook != null)
-                workbook.Close();
+            if (_workBook != null)
+                _workBook.Close();
         }
     }
 }

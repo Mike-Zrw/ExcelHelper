@@ -5,9 +5,10 @@ namespace ExcelHelper.DIExtension
 {
     public static class ExcelImporterExtension
     {
-        public static void AddExcelImporter(this IServiceCollection service)
+        public static IServiceCollection AddExcelImporter(this IServiceCollection service)
         {
             service.AddSingleton(typeof(IExcelImporter), typeof(DefaultExcelImporter));
+            return service;
         }
     }
 }

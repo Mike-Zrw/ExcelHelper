@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace ExcelHelper
+namespace ExcelHelper.Common
 {
     public static class PropertyExtension
     {

@@ -1,8 +1,9 @@
 ﻿using ExcelHelper.Importer;
 using ExcelHelper.Importer.Attributes;
-using ExcelHelper.Importer.Dtos;
 using System;
 using System.IO;
+using ExcelHelper.Common;
+using ExcelHelper.Importer.Dto;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -59,9 +60,9 @@ namespace ExcelHelper.Test
             };
             var bookmodel = new ImportBook().SetSheets(sheet1, sheet2, sheet3);
 
-            using var inputStrem = new FileStream(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Excels//Export.xlsx"), FileMode.OpenOrCreate, FileAccess.Read);
-            using var outStrem = new FileStream("E://Export_Error.xlsx", FileMode.Create, FileAccess.Write);
-            var importResult = _importer.ImportExcel(inputStrem, ExtEnum.XLSX, bookmodel, outStrem);
+            using var inputStream = new FileStream(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Excels//Export.xlsx"), FileMode.OpenOrCreate, FileAccess.Read);
+            using var outStream = new FileStream("D://Export_Error.xlsx", FileMode.Create, FileAccess.Write);
+            var importResult = _importer.ImportExcel(inputStream, ExtEnum.Xlsx, bookmodel, outStream);
 
             var success = importResult.ImportSuccess;
             var summaryErrorMsg = importResult.GetSummaryErrorMessage();
@@ -78,27 +79,27 @@ namespace ExcelHelper.Test
 
     public class ImportStudent : SheetRow
     {
-        [ColumnNameAttribute("Id")]
+        [ColumnName("Id")]
         public Guid Id { get; set; }
 
         [ColumnRequired("名字必填")]
-        [ColumnNameAttribute("名字")]
+        [ColumnName("名字")]
         public string Name { get; set; }
-        [ColumnNameAttribute("年龄")]
+        [ColumnName("年龄")]
         public int Age { get; set; }
 
         [ColumnRequired]
-        [ColumnNameAttribute("生日")]
+        [ColumnName("生日")]
         public DateTime Birthday { get; set; }
 
-        [ColumnNameAttribute("入学时间")]
+        [ColumnName("入学时间")]
         public DateTime SchoolDate { get; set; }
 
         [ColumnUnique]
-        [ColumnNameAttribute("零花钱")]
+        [ColumnName("零花钱")]
         public double Money { get; set; }
 
-        [ColumnNameAttribute("电话")]
+        [ColumnName("电话")]
         [ColumnRegex(@"^[1]+[1-9]+\d{9}$", "电话格式不对")]
         public string Phone { get; set; }
     }
@@ -117,10 +118,10 @@ namespace ExcelHelper.Test
 
     public class ImportGrade : SheetRow
     {
-        [ColumnNameAttribute("年级名称")]
+        [ColumnName("年级名称")]
         public string GradeName { get; set; }
 
-        [ColumnNameAttribute("年级编码")]
+        [ColumnName("年级编码")]
         public string Code { get; set; }
     }
 

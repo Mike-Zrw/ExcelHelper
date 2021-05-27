@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ExcelHelper.Importer.Dtos
+namespace ExcelHelper.Importer.Dto
 {
     public class SheetRow
     {
         /// <summary>
         /// 字段名和excel中坐标
         /// </summary>
-        private Dictionary<string, int> columnNameToIndex;
+        private Dictionary<string, int> _columnNameToIndex;
 
         public IEnumerable<ImportColumnProperty> ColumnProperties { get; set; }
 
@@ -51,19 +51,19 @@ namespace ExcelHelper.Importer.Dtos
                 this.ColumnNameError.Add(columnName, errorMsg);
             }
 
-            this.ColumnIndexError = this.ColumnNameError.ToDictionary(m => this.columnNameToIndex[m.Key], m => m.Value);
+            this.ColumnIndexError = this.ColumnNameError.ToDictionary(m => this._columnNameToIndex[m.Key], m => m.Value);
         }
 
-        public void SetColumnProperties(IEnumerable<ImportColumnProperty> columnProperties)
+        public void SetColumnProperties(List<ImportColumnProperty> columnProperties)
         {
             this.ColumnProperties = columnProperties;
-            this.columnNameToIndex = columnProperties.ToDictionary(m => m.PropertyInfo.Name, m => m.ColumnIndex);
+            this._columnNameToIndex = columnProperties.ToDictionary(m => m.PropertyInfo.Name, m => m.ColumnIndex);
         }
 
         public void GenerateUniqueSign()
         {
             this.UniqueColumnIndexes = new List<int>();
-            var uniqueProperties = this.ColumnProperties.Where(m => m.IsUnique);
+            var uniqueProperties = this.ColumnProperties.Where(m => m.IsUnique).ToList();
             if (this.ColumnIndexError?.Any() ?? false)
             {
                 if (uniqueProperties.Any(p => this.ColumnIndexError.Keys.Contains(p.ColumnIndex)))

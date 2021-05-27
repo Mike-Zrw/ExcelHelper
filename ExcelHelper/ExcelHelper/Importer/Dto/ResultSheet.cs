@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ExcelHelper.Importer.Dtos
+namespace ExcelHelper.Importer.Dto
 {
     public class ResultSheet<T> : BookSheet<T>, IResultSheet
              where T : SheetRow
     {
-        private string uniqueValidateErrorMessage;
-        private List<List<RepeatRow>> repeatedRowIndexes;
+        private string _uniqueValidateErrorMessage;
+        private List<List<RepeatRow>> _repeatedRowIndexes;
 
-        public bool IsValidated { get => this.SheetFormatErrorMessage == null && !(this.Data != null && this.Data.Any(p => !p.IsValidated)) && this.IsUniqueValidated; }
+        public bool IsValidated => this.SheetFormatErrorMessage == null && !(this.Data != null && this.Data.Any(p => !p.IsValidated)) && this.IsUniqueValidated;
 
         /// <summary>
         /// 唯一验证是否成功
@@ -23,14 +23,14 @@ namespace ExcelHelper.Importer.Dtos
         /// </summary>
         public string SheetFormatErrorMessage { get; set; }
 
-        public string UniqueValidateErrorMessage { get => this.uniqueValidateErrorMessage; }
+        public string UniqueValidateErrorMessage => this._uniqueValidateErrorMessage;
 
-        public IEnumerable<SheetRow> ErrorRows { get => this.Data?.Where(p => !p.IsValidated); }
+        public IEnumerable<SheetRow> ErrorRows => this.Data?.Where(p => !p.IsValidated);
 
         /// <summary>
         /// 数据重复的行
         /// </summary>
-        public List<List<RepeatRow>> RepeatedRowIndexes { get => this.repeatedRowIndexes; }
+        public List<List<RepeatRow>> RepeatedRowIndexes => this._repeatedRowIndexes;
 
         public List<T> Data { get; set; }
 
@@ -38,6 +38,7 @@ namespace ExcelHelper.Importer.Dtos
         {
             this.Data = data.ToList();
         }
+
         public IEnumerable<T2> GetData<T2>()
         {
             return (IEnumerable<T2>)this.Data;
@@ -69,7 +70,7 @@ namespace ExcelHelper.Importer.Dtos
 
             var errorData = this.Data.Where(m => !m.IsValidated);
             var errMsg = new StringBuilder();
-            foreach (SheetRow item in errorData)
+            foreach (var item in errorData)
             {
                 foreach (var err in item.ColumnIndexError)
                 {
@@ -79,7 +80,7 @@ namespace ExcelHelper.Importer.Dtos
 
             if (!this.IsUniqueValidated)
             {
-                errMsg.Append(this.uniqueValidateErrorMessage);
+                errMsg.Append(this._uniqueValidateErrorMessage);
             }
 
             return errMsg.ToString();
@@ -97,22 +98,22 @@ namespace ExcelHelper.Importer.Dtos
                 return true;
             }
 
-            this.repeatedRowIndexes = this.Data.GroupBy(m => m.UniqueSign).Where(m => m.Count() > 1).Select(m => m.Select(p => new RepeatRow
+            this._repeatedRowIndexes = this.Data.GroupBy(m => m.UniqueSign).Where(m => m.Count() > 1).Select(m => m.Select(p => new RepeatRow
             {
                 RowIndex = p.RowIndex,
                 ColumnIndexes = p.UniqueColumnIndexes,
             }).ToList()).ToList();
-            if (!this.repeatedRowIndexes.Any())
+            if (!this._repeatedRowIndexes.Any())
             {
                 return true;
             }
 
             var msg = new StringBuilder();
-            this.repeatedRowIndexes.ForEach(item =>
+            this._repeatedRowIndexes.ForEach(item =>
             {
                 msg.Append($"第{string.Join(",", item.Select(m => m.RowIndex + 1))}行.{this.UniqueValidationPrompt}.{Environment.NewLine}");
             });
-            this.uniqueValidateErrorMessage = msg.ToString();
+            this._uniqueValidateErrorMessage = msg.ToString();
             return false;
         }
     }

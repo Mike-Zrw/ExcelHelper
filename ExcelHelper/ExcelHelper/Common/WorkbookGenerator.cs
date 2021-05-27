@@ -1,20 +1,20 @@
-﻿using NPOI.HSSF.UserModel;
+﻿using System;
+using System.IO;
+using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using System;
-using System.IO;
 
-namespace ExcelHelper
+namespace ExcelHelper.Common
 {
     public class WorkbookGenerator
     {
         public static IWorkbook GetIWorkbook(Stream fileStream, ExtEnum ext)
         {
-            if (ext == ExtEnum.XLSX)
+            if (ext == ExtEnum.Xlsx)
             {
                 return new XSSFWorkbook(fileStream);
             }
-            else if (ext == ExtEnum.XLS)
+            else if (ext == ExtEnum.Xls)
             {
                 return new HSSFWorkbook(fileStream);
             }
@@ -26,11 +26,11 @@ namespace ExcelHelper
 
         public static IWorkbook GetIWorkbook(ExtEnum ext)
         {
-            if (ext == ExtEnum.XLSX)
+            if (ext == ExtEnum.Xlsx)
             {
                 return new XSSFWorkbook();
             }
-            else if (ext == ExtEnum.XLS)
+            else if (ext == ExtEnum.Xls)
             {
                 return new HSSFWorkbook();
             }

@@ -6,10 +6,11 @@ namespace ExcelHelper.DIExtension
 {
     public static class ExcelHelperExtension
     {
-        public static void AddExcelHelper(this IServiceCollection service)
+        public static IServiceCollection AddExcelHelper(this IServiceCollection service)
         {
             service.AddSingleton(typeof(IExcelExporter), typeof(DefaultExcelExporter));
             service.AddSingleton(typeof(IExcelImporter), typeof(DefaultExcelImporter));
+            return service;
         }
     }
 }

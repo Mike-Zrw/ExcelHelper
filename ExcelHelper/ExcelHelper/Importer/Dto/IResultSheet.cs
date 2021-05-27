@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ExcelHelper.Importer.Dtos
+namespace ExcelHelper.Importer.Dto
 {
     public interface IResultSheet : IBookSheet
     {

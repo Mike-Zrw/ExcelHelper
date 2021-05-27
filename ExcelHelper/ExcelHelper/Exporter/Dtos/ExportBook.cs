@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ExcelHelper.Common;
 
 namespace ExcelHelper.Exporter.Dtos
 {
@@ -6,6 +7,6 @@ namespace ExcelHelper.Exporter.Dtos
     {
         public IEnumerable<BookSheet> Sheets { get; set; }
 
-        public ExtEnum Ext { get; set; } = ExtEnum.XLSX;
+        public ExtEnum Ext { get; set; } = ExtEnum.Xlsx;
     }
 }

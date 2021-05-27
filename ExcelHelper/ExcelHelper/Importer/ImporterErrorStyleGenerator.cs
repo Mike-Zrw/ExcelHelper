@@ -1,7 +1,7 @@
-﻿using ExcelHelper.Importer.Dtos;
-using NPOI.SS.UserModel;
+﻿using NPOI.SS.UserModel;
 using System.Collections.Generic;
 using System.Linq;
+using ExcelHelper.Importer.Dto;
 
 namespace ExcelHelper.Importer
 {
@@ -71,11 +71,7 @@ namespace ExcelHelper.Importer
             {
                 foreach (var errorColumn in item.ColumnIndexError)
                 {
-                    var cell = sheet.GetRow(item.RowIndex).GetCell(errorColumn.Key);
-                    if (cell == null)
-                    {
-                        cell = sheet.GetRow(item.RowIndex).CreateCell(errorColumn.Key);
-                    }
+                    var cell = sheet.GetRow(item.RowIndex).GetCell(errorColumn.Key) ?? sheet.GetRow(item.RowIndex).CreateCell(errorColumn.Key);
 
                     SetCellErrorStyle(cell, _dataErrorStyle);
 
@@ -97,19 +93,19 @@ namespace ExcelHelper.Importer
                 {
                     var row = sheet.GetRow(repeatRow.RowIndex);
 
-                    var setedComment = false;
+                    var commented = false;
                     foreach (var columnIndex in repeatRow.ColumnIndexes)
                     {
                         var cell = row.GetCell(columnIndex);
 
                         SetCellErrorStyle(cell, _rowRepeatedErrorStyle);
 
-                        if (setedComment) continue;
+                        if (commented) continue;
 
                         if (cell.CellComment == null) cell.CellComment = commentDrawing.CreateCellComment(this._commentAnchor);
 
                         cell.CellComment.String = _commentFactory.CreateRichTextString($"{errorPrompt}.重复行：{string.Join(",", rows.Where(m => m.RowIndex != repeatRow.RowIndex).Select(m => m.RowIndex + 1))}");
-                        setedComment = true;
+                        commented = true;
                     }
                 }
             }
@@ -124,7 +120,7 @@ namespace ExcelHelper.Importer
             else
             {
                 var style = _workBook.CreateCellStyle();
-                style.CloneStyleFrom(cell.CellStyle); ;
+                style.CloneStyleFrom(cell.CellStyle);
                 style.FillForegroundColor = errorStyle.FillForegroundColor;
                 style.FillPattern = errorStyle.FillPattern;
                 cell.CellStyle = style;

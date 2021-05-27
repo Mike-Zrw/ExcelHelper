@@ -6,16 +6,17 @@ using NPOI.HSSF.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using ExcelHelper.Common;
 using Xunit;
 
 namespace ExcelHelper.Test
 {
     public class ExporterTest
     {
-        protected readonly IExcelExporter _exporter;
+        protected readonly IExcelExporter Exporter;
         public ExporterTest()
         {
-            _exporter = new DefaultExcelExporter();
+            Exporter = new DefaultExcelExporter();
         }
         [Fact]
         public void Export()
@@ -42,14 +43,14 @@ namespace ExcelHelper.Test
                 schools.Add(new ExportSchool { Name = $"{i}号学校", Address = $"学校地址{i}", Price = Math.Round(new Random().NextDouble(), 2) });
             }
 
-            var stream = new FileStream("E://Export.xlsx", FileMode.Create, FileAccess.Write);
-            _exporter.Export(new ExportBook()
+            var stream = new FileStream("D://Export.xlsx", FileMode.Create, FileAccess.Write);
+            Exporter.Export(new ExportBook()
             {
-                Ext = ExtEnum.XLSX,
+                Ext = ExtEnum.Xlsx,
                 Sheets = new List<BookSheet> {
                 new BookSheet(){  SheetName="测试", Data=students},
                 new BookSheet(){   Data=grades},
-                new BookSheet(){   Data=schools,Title=new  SheetTitle("学校列表",true,18,default,HorizontalAlignEnum.Center),  FilterColumn=new List<string>(){ "学校名称","price" } },
+                new BookSheet(){   Data=schools,Title=new  SheetTitle("学校列表",true,18,default,HorizontalAlignEnum.Center),  FilterColumn=new List<string>(){ "学校名称","Price" } },
                 }
             }, stream);
 
@@ -76,10 +77,10 @@ namespace ExcelHelper.Test
                 });
             }
 
-            var stream = new FileStream("E://ExportMergeRow.xlsx", FileMode.Create, FileAccess.Write);
-            _exporter.Export(new ExportBook()
+            var stream = new FileStream("D://ExportMergeRow.xlsx", FileMode.Create, FileAccess.Write);
+            Exporter.Export(new ExportBook()
             {
-                Ext = ExtEnum.XLSX,
+                Ext = ExtEnum.Xlsx,
                 Sheets = new List<BookSheet> { new BookSheet() { SheetName = "订单列表", Data = orders } }
             }, stream);
 
@@ -99,10 +100,10 @@ namespace ExcelHelper.Test
             }
 
 
-            var stream = new FileStream("E://ExportByFormat.xlsx", FileMode.Create, FileAccess.Write);
-            var byt = _exporter.Export(new ExportBook()
+            var stream = new FileStream("D://ExportByFormat.xlsx", FileMode.Create, FileAccess.Write);
+            var byt = Exporter.Export(new ExportBook()
             {
-                Ext = ExtEnum.XLSX,
+                Ext = ExtEnum.Xlsx,
                 Sheets = new List<BookSheet> { new BookSheet() { Data = users } }
             });
             stream.Write(byt, 0, byt.Length);
@@ -113,34 +114,34 @@ namespace ExcelHelper.Test
         public class User : SheetRow
         {
 
-            [ColumnNameAttribute("身份证")]
+            [ColumnName("身份证")]
             public string IdCard { get; set; }
 
         }
 
         public class ExportStudent : SheetRow
         {
-            [ColumnNameAttribute("Id")]
+            [ColumnName("Id")]
             public Guid Id { get; set; }
-            [ColumnNameAttribute("名字")]
+            [ColumnName("名字")]
             public string Name { get; set; }
-            [ColumnNameAttribute("年龄")]
+            [ColumnName("年龄")]
             public int Age { get; set; }
 
-            [ColumnNameAttribute("生日")]
+            [ColumnName("生日")]
             [StringFormatter("yyyy-MM-dd HH:mm:ss")]
             public DateTime? Birthday { get; set; }
 
             [ColumnStyle(FontName = "华文彩云")]
-            [ColumnNameAttribute("入学时间")]
+            [ColumnName("入学时间")]
             [StringFormatter("yyyy-MM-dd")]
             public DateTime SchoolDate { get; set; }
 
             [ColumnStyle(FontColor = 211, IsBold = true)]
-            [ColumnNameAttribute("零花钱")]
+            [ColumnName("零花钱")]
             public double Money { get; set; }
 
-            [ColumnNameAttribute("电话")]
+            [ColumnName("电话")]
             public string Phone { get; set; }
         }
 
@@ -160,13 +161,13 @@ namespace ExcelHelper.Test
         {
             [ColumnWidth(0, 10000)]
             [HeaderStyle(true)]
-            [ColumnNameAttribute("年级名称")]
+            [ColumnName("年级名称")]
             public string GradeName { get; set; }
 
             [ColumnWidth(0, 5000)]
             [HeaderStyle(true, FontColor = HSSFColor.Blue.Index)]
             [ColumnStyle(WrapText = false, FontSize = 9)]
-            [ColumnNameAttribute("年级编码")]
+            [ColumnName("年级编码")]
             public string Code { get; set; }
         }
 
@@ -175,29 +176,29 @@ namespace ExcelHelper.Test
             [RowMerged]
             [HeaderStyle(isBold: true)]
             [ColumnStyle(isBold: true, FontColor = HSSFColor.Blue.Index, VerticalAlign = VerticalAlignmentEnum.Center, HorizontalAlign = HorizontalAlignEnum.Right)]
-            [ColumnNameAttribute("订单编码")]
+            [ColumnName("订单编码")]
             public string OrderNumber { get; set; }
 
             [RowMerged]
             [HeaderStyle(isBold: true, VerticalAlign = VerticalAlignmentEnum.Top, HorizontalAlign = HorizontalAlignEnum.Right)]
             [ColumnStyle(VerticalAlign = VerticalAlignmentEnum.Center, HorizontalAlign = HorizontalAlignEnum.Center)]
-            [ColumnNameAttribute("下单人")]
+            [ColumnName("下单人")]
             public string Buyer { get; set; }
 
-            [ColumnNameAttribute("商品")]
+            [ColumnName("商品")]
             [HeaderStyle(isBold: true)]
             public string ProductName { get; set; }
 
 
-            [ColumnNameAttribute("价格")]
+            [ColumnName("价格")]
             [HeaderStyle(isBold: true)]
             public double Price { get; set; }
 
-            [ColumnNameAttribute("购买数量")]
+            [ColumnName("购买数量")]
             [HeaderStyle(isBold: true)]
             public int BuyQty { get; set; }
 
-            [ColumnNameAttribute("订单编码核对")]
+            [ColumnName("订单编码核对")]
             [HeaderStyle(isBold: true)]
             public string OrderNum2 { get; set; }
         }

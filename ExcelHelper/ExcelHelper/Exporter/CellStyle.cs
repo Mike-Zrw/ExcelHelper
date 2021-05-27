@@ -9,7 +9,6 @@ namespace ExcelHelper.Exporter
         /// </summary>
         public bool IsBold { get; set; } = false;
 
-
         /// <summary>
         /// 自动换行
         /// </summary>

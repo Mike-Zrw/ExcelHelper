@@ -1,4 +1,5 @@
-﻿using NPOI.HSSF.UserModel;
+﻿using System.Globalization;
+using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -30,9 +31,8 @@ namespace ExcelHelper.Importer
                 case CellType.Error:
                     return cell.ErrorCellValue.ToString();
                 case CellType.Numeric:
-                    return HSSFDateUtil.IsCellDateFormatted(cell) ? $"{cell.DateCellValue:G}" : cell.NumericCellValue.ToString();
+                    return DateUtil.IsCellDateFormatted(cell) ? $"{cell.DateCellValue:G}" : cell.NumericCellValue.ToString(CultureInfo.InvariantCulture);
 
-                case CellType.Unknown:
                 default:
                     return cell.ToString();
                 case CellType.String:
@@ -56,7 +56,7 @@ namespace ExcelHelper.Importer
                     }
                     catch
                     {
-                        return cell.NumericCellValue.ToString();
+                        return cell.NumericCellValue.ToString(CultureInfo.InvariantCulture);
                     }
             }
         }

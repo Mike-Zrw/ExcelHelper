@@ -1,8 +1,9 @@
 ﻿using ExcelHelper.Importer;
 using ExcelHelper.Importer.Attributes;
-using ExcelHelper.Importer.Dtos;
 using System;
 using System.IO;
+using ExcelHelper.Common;
+using ExcelHelper.Importer.Dto;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -30,10 +31,10 @@ namespace ExcelHelper.Test
             var bookmodel = new ImportBook().SetSheets(sheet);
 
             var inputFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Excels//Simple.xlsx");
-            using var inputStrem = new FileStream(inputFilePath, FileMode.OpenOrCreate, FileAccess.Read);
-            using var outStrem = new FileStream("E://Simple_Error.xlsx", FileMode.Create, FileAccess.Write);
+            using var inputStream = new FileStream(inputFilePath, FileMode.OpenOrCreate, FileAccess.Read);
+            using var outStream = new FileStream("D://Simple_Error.xlsx", FileMode.Create, FileAccess.Write);
 
-            var importResult = _importer.ImportExcel(inputStrem, inputFilePath.GetExt(), bookmodel, outStrem);
+            var importResult = _importer.ImportExcel(inputStream, inputFilePath.GetExt(), bookmodel, outStream);
 
             var success = importResult.ImportSuccess;
             var summaryErrorMsg = importResult.GetSummaryErrorMessage();

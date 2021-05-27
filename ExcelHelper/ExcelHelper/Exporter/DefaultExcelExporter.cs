@@ -1,4 +1,5 @@
-﻿using ExcelHelper.Exporter.Dtos;
+﻿using ExcelHelper.Common;
+using ExcelHelper.Exporter.Dtos;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using System;
@@ -12,52 +13,49 @@ namespace ExcelHelper.Exporter
     public class DefaultExcelExporter : IExcelExporter, IDisposable
     {
         private const string DefaultDateFormat = "yyyy-MM-dd HH:mm:ss";
-        private IWorkbook workbook;
+        private IWorkbook _workBook;
         public void Export(ExportBook book, Stream stream)
         {
             if (stream == null) throw new Exception("stream is null");
 
-            FillWrorkBook(book);
-            workbook.Write(stream);
+            FillWorkBook(book);
+            _workBook.Write(stream);
         }
 
         public byte[] Export(ExportBook book)
         {
-            FillWrorkBook(book);
+            FillWorkBook(book);
 
             using (var stream = new MemoryStream())
             {
-                workbook.Write(stream);
+                _workBook.Write(stream);
                 return stream.ToArray();
             }
         }
 
-        private void FillWrorkBook(ExportBook book)
+        private void FillWorkBook(ExportBook book)
         {
             if (!book.Sheets?.Any() ?? true) throw new Exception("sheets is empty");
 
-            workbook = WorkbookGenerator.GetIWorkbook(book.Ext);
+            _workBook = WorkbookGenerator.GetIWorkbook(book.Ext);
             foreach (var item in book.Sheets)
             {
-                this.CreateSheet(item.SheetName, item.Title, item.Data, item.FilterColumn);
+                this.CreateSheet(item.Data.GetType().GetGenericArguments()[0], item.SheetName, item.Title, item.Data?.ToList(), item.FilterColumn?.ToList());
             }
         }
 
-        public ISheet CreateSheet<T>(string sheetName, SheetTitle title, IEnumerable<T> data, IEnumerable<string> filterColumn)
+        public ISheet CreateSheet<T>(Type dateType, string sheetName, SheetTitle title, List<T> data, List<string> filterColumn)
             where T : SheetRow
         {
-            var sheet = string.IsNullOrWhiteSpace(sheetName) ? workbook.CreateSheet() : workbook.CreateSheet(sheetName);
-            if (data == null)
-            {
-                return sheet;
-            }
+            var sheet = string.IsNullOrWhiteSpace(sheetName) ? _workBook.CreateSheet() : _workBook.CreateSheet(sheetName);
+            if (data == null) return sheet;
 
-            var columnProperties = this.GetColumnProperties(data, filterColumn);
+            var columnProperties = GetColumnProperties(dateType, filterColumn);
 
             int rowIndex = 0;
             if (title != null)
             {
-                this.CreatetTitle(title, sheet, columnProperties.Count - 1);
+                this.CreateTitle(title, sheet, columnProperties.Count);
                 rowIndex++;
             }
 
@@ -92,10 +90,10 @@ namespace ExcelHelper.Exporter
                     }
 
                     cell.SetCellValue(valueStr);
-                    IBaseStyle cellstyle = null;
+                    IBaseStyle cellStyle = null;
                     if ((item.CellStyles?.Any() ?? false) && item.CellStyles.ContainsKey(property.PropertyInfo.Name))
-                        cellstyle = item.CellStyles[property.PropertyInfo.Name];
-                    SetCellStyle(cell, cacheStyles, property, cellstyle);
+                        cellStyle = item.CellStyles[property.PropertyInfo.Name];
+                    SetCellStyle(cell, cacheStyles, property, cellStyle);
                 }
             }
 
@@ -143,10 +141,7 @@ namespace ExcelHelper.Exporter
 
             void TryMergeRow(ISheet sheet2, List<int> columnIds, int beginRow, int endRow)
             {
-                if (endRow == 0)
-                {
-                    return;
-                }
+                if (endRow == 0) return;
 
                 foreach (var columnId in columnIds)
                 {
@@ -155,15 +150,14 @@ namespace ExcelHelper.Exporter
             }
         }
 
-        private List<ExportColumnProperty> GetColumnProperties<T>(IEnumerable<T> data, IEnumerable<string> filterColumn)
-            where T : SheetRow
+        private List<ExportColumnProperty> GetColumnProperties(Type type, List<string> filterColumn)
         {
-            var columnProperties = data.GetType().GetGenericArguments()[0].GetProperties()
+            var columnProperties = type.GetProperties()
                                             .Where(x => x.GetCustomAttribute(typeof(ColumnNameAttribute)) is ColumnNameAttribute)
                                             .Select(m => new ExportColumnProperty(m)).ToList();
             if (filterColumn?.Any() ?? false)
             {
-                columnProperties.RemoveAll(m => !(filterColumn.Any(p => string.Compare(p, m.Name, true) == 0) || filterColumn.Any(p => string.Compare(p, m.PropertyInfo.Name, true) == 0)));
+                columnProperties.RemoveAll(m => !(filterColumn.Any(p => String.Compare(p, m.Name, StringComparison.Ordinal) == 0) || filterColumn.Any(p => String.Compare(p, m.PropertyInfo.Name, StringComparison.Ordinal) == 0)));
             }
 
             for (int i = 0; i < columnProperties.Count; i++)
@@ -174,34 +168,37 @@ namespace ExcelHelper.Exporter
             return columnProperties;
         }
 
-        private void CreatetTitle(SheetTitle title, ISheet sheet, int columnCount)
+        private void CreateTitle(SheetTitle title, ISheet sheet, int columnCount)
         {
-            ICellStyle cellstyle = workbook.CreateCellStyle();
-            cellstyle.Alignment = (HorizontalAlignment)title.HorizontalAlign;
-            var font = workbook.CreateFont();
+            var cellStyle = _workBook.CreateCellStyle();
+            cellStyle.Alignment = (HorizontalAlignment)title.HorizontalAlign;
+            var font = _workBook.CreateFont();
             font.IsBold = title.IsBold;
             font.FontName = title.FontName;
             font.FontHeightInPoints = title.FontSize;
             font.Color = title.FontColor;
-            cellstyle.SetFont(font);
+            cellStyle.SetFont(font);
 
             var titleRow = sheet.CreateRow(0);
             titleRow.CreateCell(0).SetCellValue(title.Title);
-            CellRangeAddress region = new CellRangeAddress(0, 0, 0, columnCount);
-            sheet.AddMergedRegion(region);
-            sheet.GetRow(0).GetCell(0).CellStyle = cellstyle;
+            if (columnCount > 1)
+            {
+                CellRangeAddress region = new CellRangeAddress(0, 0, 0, columnCount - 1);
+                sheet.AddMergedRegion(region);
+            }
+            sheet.GetRow(0).GetCell(0).CellStyle = cellStyle;
         }
 
-        private int CreateHeader(ISheet sheet, IEnumerable<ExportColumnProperty> columnProperties, int rowIndex)
+        private void CreateHeader(ISheet sheet, IEnumerable<ExportColumnProperty> columnProperties, int rowIndex)
         {
-            IRow headerRow = sheet.CreateRow(rowIndex++);
+            IRow headerRow = sheet.CreateRow(rowIndex);
             foreach (var item in columnProperties)
             {
                 var cell = headerRow.CreateCell(item.ColumnIndex);
                 cell.SetCellValue(item.Name);
 
-                var fontStyle = workbook.CreateCellStyle();
-                var font = workbook.CreateFont();
+                var fontStyle = _workBook.CreateCellStyle();
+                var font = _workBook.CreateFont();
                 font.IsBold = item.HeaderStyle.IsBold;
                 font.FontName = item.HeaderStyle.FontName;
                 font.FontHeightInPoints = item.HeaderStyle.FontSize;
@@ -217,29 +214,8 @@ namespace ExcelHelper.Exporter
                 }
                 cell.CellStyle = fontStyle;
             }
-
-            return rowIndex;
         }
 
-        private Dictionary<int, ICellStyle> CreateColumnStyles(IWorkbook workbook, List<ExportColumnProperty> columnProperties)
-        {
-            var cellStyles = new Dictionary<int, ICellStyle>();
-            columnProperties.ForEach((property) =>
-            {
-                var fontStyle = workbook.CreateCellStyle();
-                var font = workbook.CreateFont();
-                font.IsBold = property.ColumnStyle.IsBold;
-                font.FontName = property.ColumnStyle.FontName;
-                font.FontHeightInPoints = property.ColumnStyle.FontSize;
-                font.Color = property.ColumnStyle.FontColor;
-                fontStyle.SetFont(font);
-                fontStyle.VerticalAlignment = (VerticalAlignment)property.ColumnStyle.VerticalAlign;
-                fontStyle.Alignment = (HorizontalAlignment)property.ColumnStyle.HorizontalAlign;
-                fontStyle.WrapText = property.ColumnStyle.WrapText;
-                cellStyles.Add(property.ColumnIndex, fontStyle);
-            });
-            return cellStyles;
-        }
         private void SetCellStyle(ICell cell, Dictionary<string, ICellStyle> cacheStyles, ExportColumnProperty property, IBaseStyle cellStyle = null)
         {
             var style = cellStyle ?? property.ColumnStyle;
@@ -248,8 +224,8 @@ namespace ExcelHelper.Exporter
                 cell.CellStyle = cacheStyles[style.ToString()];
                 return;
             }
-            var fontStyle = workbook.CreateCellStyle();
-            var font = workbook.CreateFont();
+            var fontStyle = _workBook.CreateCellStyle();
+            var font = _workBook.CreateFont();
             font.IsBold = style.IsBold;
             font.FontName = style.FontName;
             font.FontHeightInPoints = style.FontSize;
@@ -288,8 +264,8 @@ namespace ExcelHelper.Exporter
 
         public void Dispose()
         {
-            if (workbook != null)
-                workbook.Close();
+            if (_workBook != null)
+                _workBook.Close();
         }
     }
 }

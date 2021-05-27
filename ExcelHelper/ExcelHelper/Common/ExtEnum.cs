@@ -1,15 +1,15 @@
-﻿namespace ExcelHelper
+﻿namespace ExcelHelper.Common
 {
     public enum ExtEnum
     {
         /// <summary>
         /// XLSX
         /// </summary>
-        XLSX = 1,
+        Xlsx = 1,
 
         /// <summary>
         /// XLS
         /// </summary>
-        XLS = 2,
+        Xls = 2,
     }
 }

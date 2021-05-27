@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ExcelHelper.Importer.Dtos
+namespace ExcelHelper.Importer.Dto
 {
     public class BookSheet<T> : IBookSheet
         where T : SheetRow

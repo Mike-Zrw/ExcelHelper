@@ -29,7 +29,7 @@ namespace ExcelHelper.Importer.Attributes
 
         public string Pattern { get; set; }
 
-        public RegexOptions RegexOptions { get; set; } = default;
+        public RegexOptions RegexOptions { get; set; }
 
         public string ErrorMessage { get; set; } = "数据格式不正确";
     }
